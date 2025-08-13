@@ -21,6 +21,3 @@ def admin():
 @app.route('/.well-known/appspecific/com.chrome.devtools.json')
 def chrome_devtools_dummy():
     return '', 204
-
-if __name__ == '__main__':
-    app.run(debug=True)
