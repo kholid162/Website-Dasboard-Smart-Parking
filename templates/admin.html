@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - Slot Parkir</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#">Admin - Slot Parkir</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarAdmin">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item me-2">
+            <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#tambahSlotModal">+ Tambah Slot Parkir</button>
+          </li>
+          <li class="nav-item me-2">
+            <button class="btn btn-outline-light" id="openTambahModal">+ Tambah Wilayah</button>
+          </li>
+          <li class="nav-item me-2">
+            <button class="btn btn-outline-light" id="openTambahDeviceModal">+ Tambah Device</button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-danger" id="logout-btn">Logout</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link active" onclick="showPage('wilayah', event)">Wilayah</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" onclick="showPage('device', event)">Device</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- === PAGE WILAYAH === -->
+    <div id="page-wilayah">
+      <h4>Daftar Wilayah</h4>
+      <div id="wilayah-list"></div>
+    </div>
+  
+    <!-- === PAGE DEVICE === -->
+    <div id="page-device" style="display: none;">
+      <h4>Daftar Device</h4>
+      <div id="device-list"></div>
+    </div>
+  
+<!-- Modal Tambah Slot -->
+<div class="modal fade" id="tambahSlotModal" tabindex="-1" aria-labelledby="tambahSlotModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah Slot Parkir</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" id="input-slot-id" placeholder="Masukkan nama slot (contoh: Parkiran A)" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" id="btnSimpanSlot">Simpan Slot</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Tambah Wilayah Modal -->
+  <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Tambah Wilayah Baru</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="input-wilayah-name" class="form-control mb-2" placeholder="Nama Wilayah" required>
+          <select class="form-select" id="select-slot-id">
+            <option value="">Pilih Slot Parkir</option>
+          </select>
+          <label for="input-max-mobil" class="form-label">Maksimal Mobil</label>
+          <input type="number" min="0" class="form-control mb-2" id="input-max-mobil" placeholder="Misal: 5">
+          <label for="input-max-motor" class="form-label">Maksimal Motor</label>
+          <input type="number" min="0" class="form-control" id="input-max-motor" placeholder="Misal: 10">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" id="save-wilayah-btn">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal Tambah Device -->
+<div class="modal fade" id="tambahDeviceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah Device</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label>Slot Parkir</label>
+        <select id="select-slot-id-device" class="form-select mb-2">
+          <option value="">-- Pilih Slot --</option>
+        </select>
+
+        <label>Wilayah</label>
+        <select id="select-wilayah-id-device" class="form-select">
+          <option value="">-- Pilih Wilayah --</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button id="save-device-btn" class="btn btn-primary">Simpan Device</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+  <!-- Edit Device Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Device</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="number" id="edit-mobil" class="form-control mb-2" placeholder="Jumlah Mobil" min="0">
+          <input type="number" id="edit-motor" class="form-control" placeholder="Jumlah Motor" min="0">
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-danger" id="resetDeviceBtn">Reset Device</button>
+          <div>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="save-edit-btn">Simpan Perubahan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Wilayah Modal -->
+  <div class="modal fade" id="editWilayahModal" tabindex="-1" aria-labelledby="editWilayahModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Wilayah</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="edit-wilayah-name" class="form-control" placeholder="Nama Wilayah Baru">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button class="btn btn-primary" id="confirmEditWilayahBtn">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hapus Wilayah Modal -->
+  <div class="modal fade" id="hapusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Konfirmasi Hapus Wilayah</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p id="hapusModalText">Yakin ingin menghapus wilayah ini?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button class="btn btn-danger" id="confirmHapusBtn">Hapus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- === MODAL EDIT DEVICE === -->
+<div class="modal fade" id="modalEditDevice" tabindex="-1" aria-labelledby="modalEditDeviceLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Device</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label>Jumlah Mobil</label>
+        <input type="number" class="form-control mb-2" id="edit-device-mobil" min="0">
+        <label>Jumlah Motor</label>
+        <input type="number" class="form-control" id="edit-device-motor" min="0">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" id="btnSimpanEditDevice">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === MODAL HAPUS DEVICE === -->
+<div class="modal fade" id="modalHapusDevice" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Hapus Device</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="textHapusDevice"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-danger" id="btnConfirmHapusDevice">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Firebase Config & Logic -->
+  <script src="/static/js/firebase-init.js"></script>
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>
