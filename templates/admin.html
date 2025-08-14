@@ -128,27 +128,27 @@
   
 
   <!-- Edit Device Modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Device</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="number" id="edit-mobil" class="form-control mb-2" placeholder="Jumlah Mobil" min="0">
-          <input type="number" id="edit-motor" class="form-control" placeholder="Jumlah Motor" min="0">
-        </div>
-        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-outline-danger" id="resetDeviceBtn">Reset Device</button>
-          <div>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary" id="save-edit-btn">Simpan Perubahan</button>
-          </div>
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Device</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="number" id="edit-mobil" class="form-control mb-2" placeholder="Jumlah Mobil" min="0">
+        <input type="number" id="edit-motor" class="form-control" placeholder="Jumlah Motor" min="0">
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-danger" id="resetDeviceBtn">Reset Device</button>
+        <div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" id="save-edit-btn">Simpan Perubahan</button>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Edit Wilayah Modal -->
   <div class="modal fade" id="editWilayahModal" tabindex="-1" aria-labelledby="editWilayahModalLabel" aria-hidden="true">
@@ -196,15 +196,16 @@
         <h5 class="modal-title">Edit Device</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <label>Jumlah Mobil</label>
-        <input type="number" class="form-control mb-2" id="edit-device-mobil" min="0">
-        <label>Jumlah Motor</label>
-        <input type="number" class="form-control" id="edit-device-motor" min="0">
+       <div class="modal-body">
+        <input type="number" id="edit-mobil-device" class="form-control mb-2" placeholder="Jumlah Mobil" min="0">
+        <input type="number" id="edit-motor-device" class="form-control" placeholder="Jumlah Motor" min="0">
       </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-danger" id="resetDeviceBtn-device">Reset Device</button>
+      <div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button class="btn btn-primary" id="btnSimpanEditDevice">Simpan</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" id="save-edit-device-btn">Simpan Perubahan</button>
       </div>
     </div>
   </div>
