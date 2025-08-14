@@ -32,7 +32,7 @@ function formatWilayahId(name) {
 }
 
 async function loadWilayah() {
-  wilayahList.innerHTML = '';
+  wilayahList.innerHTML = ''; // pastikan di awal dibersihkan
 
   const slotSnapshot = await db.collection('slot_parkir').get();
 
@@ -53,14 +53,11 @@ async function loadWilayah() {
     </thead>
     <tbody></tbody>
   `;
-
   const tbody = table.querySelector('tbody');
   let index = 1;
 
   for (const slotDoc of slotSnapshot.docs) {
     const slotId = slotDoc.id;
-
-    // Ambil semua wilayah
     const wilayahSnap = await db.collection('slot_parkir').doc(slotId).collection('wilayah').get();
     const deviceSnap = await db.collection('slot_parkir').doc(slotId).collection('device').get();
 
@@ -68,11 +65,10 @@ async function loadWilayah() {
       const wData = wilayahDoc.data();
       const wilayahId = wilayahDoc.id;
 
-      // Cari device yang sesuai wilayah ini
+      // Cari device yang sesuai wilayah
       const devices = deviceSnap.docs.filter(d => d.data().wilayah_id === wilayahId);
 
       if (devices.length === 0) {
-        // Kalau wilayah belum ada device
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${index++}</td>
@@ -89,8 +85,7 @@ async function loadWilayah() {
         `;
         tbody.appendChild(tr);
       } else {
-        // Kalau wilayah punya device → tampilkan tiap device
-        for (const devDoc of devices) {
+        devices.forEach(devDoc => {
           const dData = devDoc.data();
           const mobilPenuh = dData.count_mobil >= wData.max_mobil;
           const motorPenuh = dData.count_motor >= wData.max_motor;
@@ -100,11 +95,8 @@ async function loadWilayah() {
           if (mobilPenuh && motorPenuh) {
             status = 'Penuh';
             badgeClass = 'bg-danger';
-          } else if (mobilPenuh) {
-            status = 'Motor Tersedia';
-            badgeClass = 'bg-warning';
-          } else if (motorPenuh) {
-            status = 'Mobil Tersedia';
+          } else if (mobilPenuh || motorPenuh) {
+            status = 'Sebagian Penuh';
             badgeClass = 'bg-warning';
           }
 
@@ -124,13 +116,14 @@ async function loadWilayah() {
             </td>
           `;
           tbody.appendChild(tr);
-        }
+        });
       }
     }
   }
 
   wilayahList.appendChild(table);
 }
+
 
   
 
@@ -249,30 +242,23 @@ document.getElementById('confirmEditWilayahBtn').addEventListener('click', async
 });
 
 
-
-function editDevice(slotId, wilayahId, deviceId) {
+function editDevice(slotId, deviceId) {
   currentEdit.slotId = slotId;
-  currentEdit.wilayahId = wilayahId;
   currentEdit.deviceId = deviceId;
 
   db.collection('slot_parkir')
     .doc(slotId)
-    .collection('wilayah')
-    .doc(wilayahId)
     .collection('device')
     .doc(deviceId)
     .get()
     .then(doc => {
       if (doc.exists) {
         const data = doc.data();
+        currentEdit.wilayahId = data.wilayah_id || ''; // simpan wilayah_id juga
         document.getElementById('edit-mobil').value = data.count_mobil;
         document.getElementById('edit-motor').value = data.count_motor;
         editModal.show();
       }
-    })
-    .catch(err => {
-      console.error("Gagal mengambil data device:", err);
-      alert("Gagal memuat data device.");
     });
 }
 
@@ -280,15 +266,13 @@ document.getElementById('save-edit-btn').addEventListener('click', async () => {
   const count_mobil = parseInt(document.getElementById('edit-mobil').value) || 0;
   const count_motor = parseInt(document.getElementById('edit-motor').value) || 0;
 
-  if (!currentEdit.slotId || !currentEdit.wilayahId || !currentEdit.deviceId) {
+  if (!currentEdit.slotId || !currentEdit.deviceId) {
     alert("Data device tidak lengkap.");
     return;
   }
 
   await db.collection('slot_parkir')
     .doc(currentEdit.slotId)
-    .collection('wilayah')
-    .doc(currentEdit.wilayahId)
     .collection('device')
     .doc(currentEdit.deviceId)
     .update({ count_mobil, count_motor });
@@ -297,18 +281,14 @@ document.getElementById('save-edit-btn').addEventListener('click', async () => {
   loadWilayah();
 });
 
-
-
 document.getElementById('resetDeviceBtn').addEventListener('click', async () => {
-  if (!currentEdit.slotId || !currentEdit.wilayahId || !currentEdit.deviceId) {
+  if (!currentEdit.slotId || !currentEdit.deviceId) {
     alert("Data device tidak lengkap.");
     return;
   }
 
   await db.collection('slot_parkir')
     .doc(currentEdit.slotId)
-    .collection('wilayah')
-    .doc(currentEdit.wilayahId)
     .collection('device')
     .doc(currentEdit.deviceId)
     .update({ count_mobil: 0, count_motor: 0 });
@@ -457,16 +437,20 @@ async function loadDeviceList() {
 
     for (const devDoc of devicesSnapshot.docs) {
       const data = devDoc.data();
+      const deviceId = devDoc.id; // ambil ID dokumen device
+
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${index++}</td>
         <td>${slotId}</td>
-        <td>${data.device_id}</td>
-        <td>${data.count_mobil}</td>
-        <td>${data.count_motor}</td>
+        <td>${deviceId}</td>
+        <td>${data.count_mobil ?? 0}</td>
+        <td>${data.count_motor ?? 0}</td>
         <td>
-          <button class="btn btn-sm btn-warning me-1" onclick="openEditDevice('${slotId}', '${data.device_id}', ${data.count_mobil}, ${data.count_motor})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="confirmHapusDevice('${slotId}', '${data.device_id}')">Hapus</button>
+          <button class="btn btn-sm btn-warning me-1" 
+            onclick="openEditDevice('${slotId}', '${deviceId}', ${data.count_mobil ?? 0}, ${data.count_motor ?? 0})">Edit</button>
+          <button class="btn btn-sm btn-danger" 
+            onclick="confirmHapusDevice('${slotId}', '${deviceId}')">Hapus</button>
         </td>
       `;
       tbody.appendChild(row);
@@ -475,36 +459,67 @@ async function loadDeviceList() {
 
   deviceListDiv.appendChild(table);
 }
-  
+
 
 
 // Fungsi buka modal edit
-function openEditDevice(slotId, wilayahId, deviceId, mobil, motor) {
+function openEditDevice(slotId, deviceId) {
   currentEdit.slotId = slotId;
-  currentEdit.wilayahId = wilayahId;
   currentEdit.deviceId = deviceId;
 
-  document.getElementById('edit-device-mobil').value = mobil;
-  document.getElementById('edit-device-motor').value = motor;
-  modalEditDevice.show();
+  db.collection('slot_parkir')
+    .doc(slotId)
+    .collection('device')
+    .doc(deviceId)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        currentEdit.wilayahId = data.wilayah_id || ''; // simpan wilayah_id juga
+        document.getElementById('edit-mobil-device').value = data.count_mobil;
+        document.getElementById('edit-motor-device').value = data.count_motor;
+        modalEditDevice.show();
+      }
+    });
 }
 
-function confirmHapusDevice(slotId, wilayahId, deviceId) {
-  deviceToDelete = { slotId, wilayahId, deviceId };
-  document.getElementById('textHapusDevice').textContent = `Yakin ingin menghapus device ${deviceId} di wilayah ${wilayahId}?`;
-  modalHapusDevice.show();
-}
+document.getElementById('save-edit-device-btn').addEventListener('click', async () => {
+  const count_mobil = parseInt(document.getElementById('edit-mobil-device').value) || 0;
+  const count_motor = parseInt(document.getElementById('edit-motor-device').value) || 0;
 
-document.getElementById('btnConfirmHapusDevice').addEventListener('click', async () => {
-  const { slotId, wilayahId, deviceId } = deviceToDelete;
-  await db.collection('slot_parkir').doc(slotId)
-    .collection('wilayah').doc(wilayahId)
-    .collection('device').doc(deviceId)
-    .delete();
-  modalHapusDevice.hide();
+  if (!currentEdit.slotId || !currentEdit.deviceId) {
+    alert("Data device tidak lengkap.");
+    return;
+  }
+
+  await db.collection('slot_parkir')
+    .doc(currentEdit.slotId)
+    .collection('device')
+    .doc(currentEdit.deviceId)
+    .update({ count_mobil, count_motor });
+
+  modalEditDevice.hide();
   loadDeviceList();
   loadWilayah();
 });
+
+document.getElementById('resetDeviceBtn-device').addEventListener('click', async () => {
+  if (!currentEdit.slotId || !currentEdit.deviceId) {
+    alert("Data device tidak lengkap.");
+    return;
+  }
+
+  await db.collection('slot_parkir')
+    .doc(currentEdit.slotId)
+    .collection('device')
+    .doc(currentEdit.deviceId)
+    .update({ count_mobil: 0, count_motor: 0 });
+
+  modalEditDevice.hide();
+  loadDeviceList();
+  loadWilayah();
+});
+
 
 
 // Konfirmasi hapus device
